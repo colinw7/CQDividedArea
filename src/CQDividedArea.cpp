@@ -6,12 +6,13 @@
 #include <QStylePainter>
 #include <QStyleOption>
 #include <QMouseEvent>
+#include <QMenu>
+
 #include <cassert>
 #include <iostream>
 
 #include <collapse.xpm>
 #include <expand.xpm>
-//#include <expand.xpm>
 
 namespace Constants {
   int MIN_WIDTH  = 32;
@@ -27,7 +28,7 @@ CQDividedArea(QWidget *parent) :
   setObjectName("dividedArea");
 }
 
-int
+CQDividedAreaWidget *
 CQDividedArea::
 addWidget(QWidget *w, const QString &title)
 {
@@ -50,7 +51,38 @@ addWidget(QWidget *w, const QString &title)
 
   widget->setVisible(true);
 
-  return id;
+  if (isVisible())
+    updateLayout();
+
+  return widget;
+}
+
+void
+CQDividedArea::
+removeWidget(QWidget *w)
+{
+  for (Widgets::iterator p = widgets_.begin(); p != widgets_.end(); ++p) {
+    CQDividedAreaWidget *widget = (*p).second;
+    if (widget->widget() != w) continue;
+
+    int id = widget->id();
+
+    Splitters::iterator ps = splitters_.find(id);
+    assert(ps != splitters_.end());
+
+    CQDividedAreaSplitter *splitter = (*ps).second;
+
+    delete widget;
+    delete splitter;
+
+    widgets_  .erase(p);
+    splitters_.erase(ps);
+
+    if (isVisible())
+      updateLayout();
+
+    return;
+  }
 }
 
 void
@@ -434,6 +466,10 @@ CQDividedAreaTitle(CQDividedAreaWidget *widget) :
   connect(collapseButton_, SIGNAL(clicked()), this, SLOT(collapseSlot()));
 
   updateState();
+
+  //---
+
+  setContextMenuPolicy(Qt::DefaultContextMenu);
 }
 
 void
@@ -472,7 +508,8 @@ void
 CQDividedAreaTitle::
 updateLayout()
 {
-  collapseButton_->move(width() - collapseButton_->width() - 2, 2);
+  collapseButton_->move(width() - collapseButton_->width() - 2,
+                        (height() - collapseButton_->height())/2);
 }
 
 void
@@ -486,23 +523,56 @@ paintEvent(QPaintEvent *)
   int x = 2;
   int h = height();
 
+  int iw = 0;
+
   if (! icon_.isNull()) {
+    iw = iconSize().width() + 2;
+
     painter.drawPixmap(x, (h - iconSize().height())/2, icon().pixmap(iconSize()));
 
-    x += iconSize().width() + 2;
+    x += iw;
   }
+
+  int bw = collapseButton_->width();
 
   if (title_.length()) {
     QFontMetrics fm(font());
 
-    painter.drawText(x, (h - fm.height())/2 + fm.ascent(), title_);
+    QString title = fm.elidedText(title_, Qt::ElideRight, width() - iw - bw - 6);
+
+    // if just an ellipsis keep first letter
+    if (title.length() == 0 || title.utf16()[0] == 8230)
+      title = title_[0] + "..";
+
+    painter.drawText(x, (h - fm.height())/2 + fm.ascent(), title);
   }
+
+  QRect buttonRect(collapseButton_->x() - 2, 0, bw + 4, height());
+
+  painter.fillRect(buttonRect, QBrush(bg_));
 
   QColor c = widget_->palette().window().color().darker(200);
 
   painter.setPen(c);
 
   painter.drawLine(0, height() - 1, width() - 1, height() - 1);
+}
+
+void
+CQDividedAreaTitle::
+contextMenuEvent(QContextMenuEvent *e)
+{
+  QMenu *menu = new QMenu;
+
+  QAction *collapseAction = menu->addAction(widget_->isCollapsed() ? "Expand" : "Collapse");
+
+  menu->addAction(collapseAction);
+
+  connect(collapseAction, SIGNAL(triggered()), this, SLOT(collapseSlot()));
+
+  menu->exec(e->globalPos());
+
+  delete menu;
 }
 
 void

@@ -17,7 +17,9 @@ class CQDividedArea : public QFrame {
  public:
   CQDividedArea(QWidget *parent=0);
 
-  int addWidget(QWidget *w, const QString &title);
+  CQDividedAreaWidget *addWidget(QWidget *w, const QString &title);
+
+  void removeWidget(QWidget *w);
 
   QSize minimumSizeHint() const;
 
@@ -121,6 +123,8 @@ class CQDividedAreaTitle : public QWidget {
   void resizeEvent(QResizeEvent *e);
 
   void paintEvent(QPaintEvent *);
+
+  void contextMenuEvent(QContextMenuEvent *);
 
   void updateLayout();
 
