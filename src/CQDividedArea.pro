@@ -4,6 +4,8 @@ TARGET = CQDividedArea
 
 DEPENDPATH += .
 
+QT += widgets
+
 CONFIG += staticlib
 
 # Input
