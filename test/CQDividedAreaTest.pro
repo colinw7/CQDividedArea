@@ -1,10 +1,18 @@
 TEMPLATE = app
 
-TARGET = 
+TARGET = CQDividedAreaTest
 
 DEPENDPATH += .
 
-#CONFIG += debug
+INCLUDEPATH += ../include .
+
+QMAKE_CXXFLAGS += -std=c++11
+
+CONFIG += debug
+
+MOC_DIR = .moc
+
+QT += widgets
 
 # Input
 SOURCES += \
@@ -13,13 +21,12 @@ CQDividedAreaTest.cpp \
 HEADERS += \
 CQDividedAreaTest.h \
 
-DESTDIR     = .
-OBJECTS_DIR = .
-
-INCLUDEPATH += \
-../include \
-.
+DESTDIR     = ../bin
+OBJECTS_DIR = ../obj
+LIB_DIR     = ../lib
 
 unix:LIBS += \
--L../lib \
--lCQDividedArea
+-L$$LIB_DIR \
+-L../../CQUtil/lib \
+-lCQDividedArea \
+-lCQUtil \

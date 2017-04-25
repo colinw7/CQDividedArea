@@ -11,8 +11,8 @@
 #include <cassert>
 #include <iostream>
 
-#include <collapse.xpm>
-#include <expand.xpm>
+#include <svg/up_svg.h>
+#include <svg/down_svg.h>
 
 namespace Constants {
   int MIN_WIDTH  = 32;
@@ -30,7 +30,7 @@ CQDividedArea(QWidget *parent) :
 
 CQDividedAreaWidget *
 CQDividedArea::
-addWidget(QWidget *w, const QString &title)
+addWidget(QWidget *w, const QString &title, const QIcon &icon)
 {
   int id = ++widgetId;
 
@@ -38,6 +38,10 @@ addWidget(QWidget *w, const QString &title)
 
   widget->setWidget(w);
   widget->setTitle (title);
+  widget->setIcon  (icon);
+
+  connect(widget, SIGNAL(collapseStateChanged(bool)),
+          this, SLOT(widgetCollapseStateChanged(bool)));
 
   CQDividedAreaSplitter *splitter = new CQDividedAreaSplitter(this, id);
 
@@ -61,13 +65,13 @@ void
 CQDividedArea::
 removeWidget(QWidget *w)
 {
-  for (Widgets::iterator p = widgets_.begin(); p != widgets_.end(); ++p) {
-    CQDividedAreaWidget *widget = (*p).second;
+  for (const auto &idWidget : widgets_) {
+    int                  id     = idWidget.first;
+    CQDividedAreaWidget *widget = idWidget.second;
+
     if (widget->widget() != w) continue;
 
-    int id = widget->id();
-
-    Splitters::iterator ps = splitters_.find(id);
+    auto ps = splitters_.find(id);
     assert(ps != splitters_.end());
 
     CQDividedAreaSplitter *splitter = (*ps).second;
@@ -75,7 +79,7 @@ removeWidget(QWidget *w)
     delete widget;
     delete splitter;
 
-    widgets_  .erase(p);
+    widgets_  .erase(id);
     splitters_.erase(ps);
 
     if (isVisible())
@@ -113,8 +117,8 @@ updateLayout(bool reset)
   std::vector<CQDividedAreaWidget *> visibleWidgets;
   int                                numNonVisible = 0;
 
-  for (Widgets::const_iterator p = widgets_.begin(); p != widgets_.end(); ++p) {
-    CQDividedAreaWidget *widget = (*p).second;
+  for (const auto &idWidget : widgets_) {
+    CQDividedAreaWidget *widget = idWidget.second;
 
     // reset temp collapsed and adjist contents height if needed
     if (reset) {
@@ -154,9 +158,9 @@ updateLayout(bool reset)
     int w = width() - l - r;
     int h = height() - t - b;
 
-    for (Widgets::const_iterator p = widgets_.begin(); p != widgets_.end(); ++p) {
-      int                  id     = (*p).first;
-      CQDividedAreaWidget *widget = (*p).second;
+    for (const auto &idWidget : widgets_) {
+      int                  id     = idWidget.first;
+      CQDividedAreaWidget *widget = idWidget.second;
 
       bool expanded = ! widget->isCollapsed();
 
@@ -220,8 +224,8 @@ updateLayout(bool reset)
 
       int adjust1 = (numVisible > 1 ? adjust/(numVisible - 1) : 0);
 
-      for (Widgets::const_iterator p = widgets_.begin(); p != widgets_.end(); ++p) {
-        CQDividedAreaWidget *widget = (*p).second;
+      for (const auto &idWidget : widgets_) {
+        CQDividedAreaWidget *widget = idWidget.second;
 
         if (widget != lastWidget)
           widget->setAdjustContentsHeight(widget->adjustContentsHeight() + adjust1);
@@ -277,6 +281,56 @@ splitterMoved(int d)
   updateLayout(false);
 }
 
+void
+CQDividedArea::
+widgetCollapseStateChanged(bool)
+{
+  if (! isSingleArea())
+    return;
+
+  CQDividedAreaWidget *widget = qobject_cast<CQDividedAreaWidget *>(sender());
+  if (! widget) return;
+
+  for (const auto &idWidget : widgets_) {
+    CQDividedAreaWidget *widget = idWidget.second;
+
+    disconnect(widget, SIGNAL(collapseStateChanged(bool)),
+               this, SLOT(widgetCollapseStateChanged(bool)));
+  }
+
+  if (widget->isCollapsed()) {
+    CQDividedAreaWidget *openWidget = nullptr;
+
+    for (const auto &idWidget : widgets_) {
+      CQDividedAreaWidget *widget1 = idWidget.second;
+      if (widget1 == widget) continue;
+
+      if (! openWidget) {
+        widget1->setCollapsed(true);
+
+        openWidget = widget1;
+      }
+      else
+        widget1->setCollapsed(false);
+    }
+  }
+  else {
+    for (const auto &idWidget : widgets_) {
+      CQDividedAreaWidget *widget1 = idWidget.second;
+      if (widget1 == widget) continue;
+
+      widget1->setCollapsed(true);
+    }
+  }
+
+  for (const auto &idWidget : widgets_) {
+    CQDividedAreaWidget *widget = idWidget.second;
+
+    connect(widget, SIGNAL(collapseStateChanged(bool)),
+            this, SLOT(widgetCollapseStateChanged(bool)));
+  }
+}
+
 QSize
 CQDividedArea::
 minimumSizeHint() const
@@ -300,8 +354,7 @@ minimumSizeHint() const
 
 CQDividedAreaWidget::
 CQDividedAreaWidget(CQDividedArea *area, int id) :
- QWidget(area), area_(area), id_(id), w_(0), collapsed_(false), tempCollapsed_(false),
- height_(-1), adjustHeight_(0)
+ QWidget(area), area_(area), id_(id)
 {
   setObjectName("widget");
 
@@ -371,6 +424,8 @@ setCollapsed(bool collapsed)
   updateState();
 
   area_->updateLayout();
+
+  emit collapseStateChanged(collapsed_);
 }
 
 void
@@ -443,7 +498,7 @@ minContentsHeight() const
 
 CQDividedAreaTitle::
 CQDividedAreaTitle(CQDividedAreaWidget *widget) :
- widget_(widget), title_(), icon_(), iconSize_(10,10)
+ widget_(widget)
 {
   QFont f = widget->font();
 
@@ -488,6 +543,13 @@ setIcon(const QIcon &icon)
   icon_ = icon;
 
   update();
+}
+
+void
+CQDividedAreaTitle::
+setIconSize(const QSize &s)
+{
+  iconSize_ = s;
 }
 
 void
@@ -587,12 +649,12 @@ CQDividedAreaTitle::
 updateState()
 {
   if (widget_->isCollapsed()) {
-    collapseButton_->setIcon(QIcon(QPixmap(expand_data)));
+    collapseButton_->setIcon(CQPixmapCacheInst->getIcon("UP"));
 
     collapseButton_->setToolTip("Expand");
   }
   else {
-    collapseButton_->setIcon(QIcon(QPixmap(collapse_data)));
+    collapseButton_->setIcon(CQPixmapCacheInst->getIcon("DOWN"));
 
     collapseButton_->setToolTip("Collapse");
   }
@@ -606,7 +668,10 @@ CQDividedAreaTitleButton(CQDividedAreaTitle *title) :
 {
   setObjectName("button");
 
-  setIconSize(title_->iconSize());
+  //setIconSize(title_->iconSize());
+  int is = 0.9*QFontMetrics(font()).height();
+
+  setIconSize(QSize(is, is));
 
   setAutoRaise(true);
 
@@ -632,7 +697,7 @@ paintEvent(QPaintEvent *)
 
 CQDividedAreaSplitter::
 CQDividedAreaSplitter(CQDividedArea *area, int id) :
- QWidget(area), area_(area), id_(id), otherId_(0)
+ QWidget(area), area_(area), id_(id)
 {
   setObjectName("splitter");
 
