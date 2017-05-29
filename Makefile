@@ -8,4 +8,4 @@ clean:
 	cd test; qmake; make clean
 	rm test/Makefile
 	rm -f lib/libCQDividedArea.a
-	rm -f test/CQDividedAreaTest
+	rm -f bin/CQDividedAreaTest
