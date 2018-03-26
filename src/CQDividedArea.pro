@@ -1,6 +1,6 @@
 TEMPLATE = lib
 
-QMAKE_CXXFLAGS += -std=c++11
+QMAKE_CXXFLAGS += -std=c++14
 
 TARGET = CQDividedArea
 
