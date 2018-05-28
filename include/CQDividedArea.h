@@ -28,6 +28,8 @@ class CQDividedArea : public QFrame {
 
   QSize minimumSizeHint() const;
 
+  QSize sizeHint() const;
+
  private:
   friend class CQDividedAreaWidget;
 
@@ -93,6 +95,10 @@ class CQDividedAreaWidget : public QWidget {
 
   int minContentsHeight() const;
 
+  QSize minimumSizeHint() const;
+
+  QSize sizeHint() const;
+
  signals:
   void collapseStateChanged(bool);
 
@@ -104,14 +110,14 @@ class CQDividedAreaWidget : public QWidget {
   void updateState();
 
  private:
-  CQDividedArea      *area_ { nullptr };
-  int                 id_ { 0 };
-  QWidget            *w_ { nullptr };
-  bool                collapsed_ { false };
+  CQDividedArea*      area_          { nullptr };
+  int                 id_            { 0 };
+  QWidget*            w_             { nullptr };
+  bool                collapsed_     { false };
   bool                tempCollapsed_ { false };
-  int                 height_ { -1 };
-  int                 adjustHeight_ { 0 };
-  CQDividedAreaTitle *titleWidget_ { nullptr };
+  int                 height_        { -1 };
+  int                 adjustHeight_  { 0 };
+  CQDividedAreaTitle* titleWidget_   { nullptr };
 };
 
 //------

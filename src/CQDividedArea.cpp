@@ -335,6 +335,28 @@ QSize
 CQDividedArea::
 minimumSizeHint() const
 {
+  int l, t, r, b;
+
+  getContentsMargins(&l, &t, &r, &b);
+
+  int w = 0;
+  int h = 0;
+
+  for (const auto &idWidget : widgets_) {
+    const CQDividedAreaWidget *widget = idWidget.second;
+
+    w = std::max(w, widget->minimumSizeHint().width());
+
+    h += widget->minimumSizeHint().height();
+  }
+
+  return QSize(w + l + r, h + t + b);
+}
+
+QSize
+CQDividedArea::
+sizeHint() const
+{
   if (widgets_.empty())
     return QFrame::minimumSizeHint();
 
@@ -342,10 +364,16 @@ minimumSizeHint() const
 
   getContentsMargins(&l, &t, &r, &b);
 
-  CQDividedAreaWidget *widget = widgets_.begin()->second;
+  int w = 0;
+  int h = 0;
 
-  int w = Constants::MIN_WIDTH;
-  int h = widgets_.size()*widget->titleHeight();
+  for (const auto &idWidget : widgets_) {
+    const CQDividedAreaWidget *widget = idWidget.second;
+
+    w = std::max(w, widget->sizeHint().width());
+
+    h += widget->sizeHint().height();
+  }
 
   return QSize(w + l + r, h + t + b);
 }
@@ -492,6 +520,28 @@ minContentsHeight() const
   QSize s = CQWidgetUtil::SmartMinSize(w_);
 
   return std::max(s.height(), Constants::MIN_HEIGHT);
+}
+
+QSize
+CQDividedAreaWidget::
+minimumSizeHint() const
+{
+  int w = Constants::MIN_WIDTH;
+  int h = titleHeight();
+
+  return QSize(w, h);
+}
+
+QSize
+CQDividedAreaWidget::
+sizeHint() const
+{
+  int w = w_->sizeHint().width();
+  int h = w_->sizeHint().height();
+
+  h += titleHeight();
+
+  return QSize(w, h);
 }
 
 //------
@@ -669,7 +719,7 @@ CQDividedAreaTitleButton(CQDividedAreaTitle *title) :
   setObjectName("button");
 
   //setIconSize(title_->iconSize());
-  int is = 0.9*QFontMetrics(font()).height();
+  int is = 0.9*QFontMetrics(font()).ascent();
 
   setIconSize(QSize(is, is));
 
