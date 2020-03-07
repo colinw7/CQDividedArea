@@ -752,6 +752,10 @@ CQDividedAreaSplitter(CQDividedArea *area, int id) :
   setObjectName("splitter");
 
   setFixedHeight(5);
+
+  setCursor(Qt::SizeVerCursor);
+
+  setMouseTracking(true);
 }
 
 void
