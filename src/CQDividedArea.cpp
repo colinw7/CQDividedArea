@@ -11,8 +11,8 @@
 #include <cassert>
 #include <iostream>
 
-#include <svg/up_svg.h>
-#include <svg/down_svg.h>
+#include <svg/up_gradient_svg.h>
+#include <svg/down_gradient_svg.h>
 
 namespace Constants {
   int MIN_WIDTH  = 32;
@@ -699,12 +699,12 @@ CQDividedAreaTitle::
 updateState()
 {
   if (widget_->isCollapsed()) {
-    collapseButton_->setIcon(CQPixmapCacheInst->getIcon("UP"));
+    collapseButton_->setIcon(CQPixmapCacheInst->getIcon("UP_GRADIENT"));
 
     collapseButton_->setToolTip("Expand");
   }
   else {
-    collapseButton_->setIcon(CQPixmapCacheInst->getIcon("DOWN"));
+    collapseButton_->setIcon(CQPixmapCacheInst->getIcon("DOWN_GRADIENT"));
 
     collapseButton_->setToolTip("Collapse");
   }
