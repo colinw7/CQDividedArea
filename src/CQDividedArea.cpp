@@ -11,8 +11,11 @@
 #include <cassert>
 #include <iostream>
 
-#include <svg/up_gradient_svg.h>
-#include <svg/down_gradient_svg.h>
+#include <svg/up_gradient_light_svg.h>
+#include <svg/up_gradient_dark_svg.h>
+
+#include <svg/down_gradient_light_svg.h>
+#include <svg/down_gradient_dark_svg.h>
 
 namespace Constants {
   int MIN_WIDTH  = 32;
@@ -34,7 +37,7 @@ addWidget(QWidget *w, const QString &title, const QIcon &icon)
 {
   int id = ++widgetId;
 
-  CQDividedAreaWidget *widget = new CQDividedAreaWidget(this, id);
+  auto *widget = new CQDividedAreaWidget(this, id);
 
   widget->setWidget(w);
   widget->setTitle (title);
@@ -43,7 +46,7 @@ addWidget(QWidget *w, const QString &title, const QIcon &icon)
   connect(widget, SIGNAL(collapseStateChanged(bool)),
           this, SLOT(widgetCollapseStateChanged(bool)));
 
-  CQDividedAreaSplitter *splitter = new CQDividedAreaSplitter(this, id);
+  auto *splitter = new CQDividedAreaSplitter(this, id);
 
   connect(splitter, SIGNAL(moved(int)), this, SLOT(splitterMoved(int)));
 
@@ -556,8 +559,6 @@ CQDividedAreaTitle(CQDividedAreaWidget *widget) :
 
   setFont(f);
 
-  bg_ = widget_->palette().window().color().darker(110);
-
   //---
 
   setObjectName("title");
@@ -630,6 +631,8 @@ paintEvent(QPaintEvent *)
 {
   QPainter painter(this);
 
+  bg_ = widget_->palette().window().color().darker(110);
+
   painter.fillRect(rect(), QBrush(bg_));
 
   int x = 2;
@@ -699,12 +702,12 @@ CQDividedAreaTitle::
 updateState()
 {
   if (widget_->isCollapsed()) {
-    collapseButton_->setIcon(CQPixmapCacheInst->getIcon("UP_GRADIENT"));
+    collapseButton_->setIcon("UP_GRADIENT");
 
     collapseButton_->setToolTip("Expand");
   }
   else {
-    collapseButton_->setIcon(CQPixmapCacheInst->getIcon("DOWN_GRADIENT"));
+    collapseButton_->setIcon("DOWN_GRADIENT");
 
     collapseButton_->setToolTip("Collapse");
   }
@@ -714,14 +717,15 @@ updateState()
 
 CQDividedAreaTitleButton::
 CQDividedAreaTitleButton(CQDividedAreaTitle *title) :
- QToolButton(title), title_(title)
+ CQIconButton(title), title_(title)
 {
   setObjectName("button");
 
-  //setIconSize(title_->iconSize());
-  int is = 0.9*QFontMetrics(font()).ascent();
+  setSize(Size::SMALL);
 
-  setIconSize(QSize(is, is));
+  //setIconSize(title_->iconSize());
+  //int is = 0.9*QFontMetrics(font()).ascent();
+  //setIconSize(QSize(is, is));
 
   setAutoRaise(true);
 

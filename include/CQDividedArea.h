@@ -1,8 +1,9 @@
 #ifndef CQDividedArea_H
 #define CQDividedArea_H
 
+#include <CQIconButton.h>
+
 #include <QFrame>
-#include <QToolButton>
 #include <QIcon>
 #include <map>
 
@@ -26,16 +27,16 @@ class CQDividedArea : public QFrame {
 
   void removeWidget(QWidget *w);
 
-  QSize minimumSizeHint() const;
+  QSize minimumSizeHint() const override;
 
-  QSize sizeHint() const;
+  QSize sizeHint() const override;
 
  private:
   friend class CQDividedAreaWidget;
 
-  void showEvent(QShowEvent *e);
+  void showEvent(QShowEvent *e) override;
 
-  void resizeEvent(QResizeEvent *e);
+  void resizeEvent(QResizeEvent *e) override;
 
   void updateLayout(bool reset=true);
 
@@ -95,9 +96,9 @@ class CQDividedAreaWidget : public QWidget {
 
   int minContentsHeight() const;
 
-  QSize minimumSizeHint() const;
+  QSize minimumSizeHint() const override;
 
-  QSize sizeHint() const;
+  QSize sizeHint() const override;
 
  signals:
   void collapseStateChanged(bool);
@@ -144,13 +145,13 @@ class CQDividedAreaTitle : public QWidget {
  private:
   friend class CQDividedAreaWidget;
 
-  void showEvent(QShowEvent *e);
+  void showEvent(QShowEvent *e) override;
 
-  void resizeEvent(QResizeEvent *e);
+  void resizeEvent(QResizeEvent *e) override;
 
-  void paintEvent(QPaintEvent *);
+  void paintEvent(QPaintEvent *) override;
 
-  void contextMenuEvent(QContextMenuEvent *);
+  void contextMenuEvent(QContextMenuEvent *) override;
 
   void updateLayout();
 
@@ -170,14 +171,14 @@ class CQDividedAreaTitle : public QWidget {
 
 //------
 
-class CQDividedAreaTitleButton : public QToolButton {
+class CQDividedAreaTitleButton : public CQIconButton {
   Q_OBJECT
 
  public:
   CQDividedAreaTitleButton(CQDividedAreaTitle *title);
 
  private:
-  void paintEvent(QPaintEvent *);
+  void paintEvent(QPaintEvent *) override;
 
  private:
   CQDividedAreaTitle *title_ { nullptr };
@@ -197,14 +198,14 @@ class CQDividedAreaSplitter : public QWidget {
   void setOtherId(int id) { otherId_ = id; }
 
  private:
-  void mousePressEvent  (QMouseEvent *e);
-  void mouseMoveEvent   (QMouseEvent *e);
-  void mouseReleaseEvent(QMouseEvent *e);
+  void mousePressEvent  (QMouseEvent *e) override;
+  void mouseMoveEvent   (QMouseEvent *e) override;
+  void mouseReleaseEvent(QMouseEvent *e) override;
 
-  void enterEvent(QEvent *e);
-  void leaveEvent(QEvent *e);
+  void enterEvent(QEvent *e) override;
+  void leaveEvent(QEvent *e) override;
 
-  void paintEvent(QPaintEvent *);
+  void paintEvent(QPaintEvent *) override;
 
  signals:
   void moved(int d);
