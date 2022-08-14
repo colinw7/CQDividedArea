@@ -139,7 +139,7 @@ updateLayout(bool reset)
       ++numNonVisible;
   }
 
-  int numVisible = visibleWidgets.size();
+  int numVisible = int(visibleWidgets.size());
 
   CQDividedAreaWidget *lastWidget = (numVisible ? visibleWidgets.back() : 0);
 
