@@ -110,9 +110,10 @@ void
 CQDividedArea::
 updateLayout(bool reset)
 {
-  int l, t, r, b;
-
-  getContentsMargins(&l, &t, &r, &b);
+  int l = contentsMargins().left  ();
+  int t = contentsMargins().top   ();
+  int r = contentsMargins().right  ();
+  int b = contentsMargins().bottom();
 
   //---
 
@@ -338,9 +339,10 @@ QSize
 CQDividedArea::
 minimumSizeHint() const
 {
-  int l, t, r, b;
-
-  getContentsMargins(&l, &t, &r, &b);
+  int l = contentsMargins().left  ();
+  int t = contentsMargins().top   ();
+  int r = contentsMargins().right  ();
+  int b = contentsMargins().bottom();
 
   int w = 0;
   int h = 0;
@@ -363,9 +365,10 @@ sizeHint() const
   if (widgets_.empty())
     return QFrame::minimumSizeHint();
 
-  int l, t, r, b;
-
-  getContentsMargins(&l, &t, &r, &b);
+  int l = contentsMargins().left  ();
+  int t = contentsMargins().top   ();
+  int r = contentsMargins().right  ();
+  int b = contentsMargins().bottom();
 
   int w = 0;
   int h = 0;

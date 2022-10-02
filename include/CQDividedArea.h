@@ -46,8 +46,8 @@ class CQDividedArea : public QFrame {
   void widgetCollapseStateChanged(bool collapsed);
 
  private:
-  typedef std::map<int,CQDividedAreaWidget *>   Widgets;
-  typedef std::map<int,CQDividedAreaSplitter *> Splitters;
+  typedef std::map<int, CQDividedAreaWidget *>   Widgets;
+  typedef std::map<int, CQDividedAreaSplitter *> Splitters;
 
   static int widgetId;
 
