@@ -142,7 +142,7 @@ updateLayout(bool reset)
 
   int numVisible = int(visibleWidgets.size());
 
-  CQDividedAreaWidget *lastWidget = (numVisible ? visibleWidgets.back() : 0);
+  CQDividedAreaWidget *lastWidget = (numVisible ? visibleWidgets.back() : nullptr);
 
   int lastSpace = (lastWidget ? numNonVisible*lastWidget->titleHeight() : 0);
 
@@ -243,7 +243,7 @@ updateLayout(bool reset)
       --numVisible;
       ++numNonVisible;
 
-      lastWidget = (numVisible ? visibleWidgets.back() : 0);
+      lastWidget = (numVisible ? visibleWidgets.back() : nullptr);
 
       lastSpace = (lastWidget ? numNonVisible*lastWidget->titleHeight() : 0);
     }

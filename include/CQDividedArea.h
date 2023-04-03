@@ -18,7 +18,7 @@ class CQDividedArea : public QFrame {
   Q_PROPERTY(bool singleArea READ isSingleArea WRITE setSingleArea)
 
  public:
-  CQDividedArea(QWidget *parent=0);
+  CQDividedArea(QWidget *parent=nullptr);
 
   bool isSingleArea() const { return singleArea_; }
   void setSingleArea(bool b) { singleArea_ = b; }
